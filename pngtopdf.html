@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PNG to PDF Converter</title>
+    <style>
+      body {
+        background-color: #f6e1e1;
+			  font-family: Arial, sans-serif;
+			  margin: 0;
+			  padding: 0;
+      }
+
+      div {
+        margin: 20px auto;
+        width: 50%;
+        padding: 20px;
+        background-color: #f6e1e1;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+
+      form {
+        display: inline-block;
+        margin: 0 auto;
+        text-align: left;
+      }
+
+      input[type="file"] {
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      button[type="submit"] {
+        display: inline-block;
+			  margin: 10px;
+			  padding: 10px 15px;
+			  background-color: #0077b6;
+			  color: #ffffff;
+			  font-size: 18px;
+			  text-align: center;
+			  border: none;
+			  border-radius: 10px;
+			  cursor: pointer;
+			  box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+			  transition: all 0.2s ease-in-out;
+			  transform: scale(1);
+      }
+
+      button[type="submit"]:hover {
+        background-color: #ffffff;
+			  color: #0077b6;
+			  transform: scale(1.05);
+			  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <form id="convert-form">
+        <input type="file" id="image-input" accept=".png"/>
+        <button id="convert-button">𝔠𝔬𝔫𝔳𝔢𝔯𝔱 𝔱𝔬 𝔭𝔡𝔣</button>
+      </form>
+    </div>
+    <script>
+      const form = document.getElementById("convert-form");
+      form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        const input = document.getElementById("image-input");
+        if (!input.files || !input.files[0]) {
+          alert("Please select a PNG image.");
+          return;
+        }
+        const image = input.files[0];
+        if (image.type !== "image/png") {
+          alert("Invalid image format. Please select a PNG image.");
+          return;
+        }
+        if (image.size > 10 * 1024 * 1024) {
+          alert("Image size must be less than 10 MB.");
+          return;
+        }
+        const formData = new FormData();
+        formData.append("image", image);
+        fetch("/api/pngtopdf", {
+          method: "POST",
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Conversion failed");
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "converted.pdf";
+          link.click();
+        })
+        .catch(error => {
+          alert(error.message);
+        });
+      });
+    </script>
+  </body>
+</html>
+
+
